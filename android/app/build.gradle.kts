@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.flutter_bestell_fix"
+    namespace = "eu.webexpanded.bestellfix"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
