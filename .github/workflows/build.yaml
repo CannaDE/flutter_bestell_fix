@@ -1,0 +1,49 @@
+name: Flutter Build (iOS & Android)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest  # macOS, damit wir iOS bauen können
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.8'  # Passe an deine Flutter-Version an
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    # ================= iOS Build =================
+    - name: Build iOS for AltStore
+      run: flutter build ios --release --no-codesign
+
+    - name: Archive iOS IPA
+      run: |
+        mkdir -p build/ios/ipa
+        cd ios/Flutter
+        zip -r ../../build/ios/ipa/MyApp.ipa .
+
+    - name: Upload iOS IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: MyApp-IPA
+        path: build/ios/ipa/MyApp.ipa
+
+    # ================= Android Build =================
+    - name: Build Android APK
+      run: flutter build apk --release
+
+    - name: Upload Android APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: MyApp-APK
+        path: build/app/outputs/flutter-apk/app-release.apk
