@@ -196,14 +196,6 @@ void initState() {
 
   void _saveOrder() {
     if (_formKey.currentState!.validate()) {
-      print('Projekt: $project');
-      print('Firma: $company');
-      print(
-          'Datum: ${selectedDate.day.toString().padLeft(2, '0')}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.year}');
-      print('Ansprechpartner: $contactPerson');
-      print('Telefonnummer: $phoneNumber');
-      print('Produkte: $_products');
-
       final orderData = {
         'id': orderId,
         'project': project,

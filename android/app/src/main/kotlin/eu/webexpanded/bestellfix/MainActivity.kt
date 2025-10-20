@@ -1,5 +1,6 @@
-package com.example.flutter_bestell_fix
+package eu.webexpanded.bestellfix
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity : FlutterActivity()
+class MainActivity: FlutterActivity() {
+}
