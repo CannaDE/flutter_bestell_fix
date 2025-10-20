@@ -23,20 +23,14 @@ jobs:
       run: flutter pub get
 
     # ================= iOS Build =================
-    - name: Build iOS for AltStore
-      run: flutter build ios --release --no-codesign
-
-    - name: Archive iOS IPA
-      run: |
-        mkdir -p build/ios/ipa
-        cd ios/Flutter
-        zip -r ../../build/ios/ipa/MyApp.ipa .
+    - name: Build iOS IPA for AltStore
+      run: flutter build ipa --release --export-method ad-hoc
 
     - name: Upload iOS IPA
       uses: actions/upload-artifact@v4
       with:
         name: MyApp-IPA
-        path: build/ios/ipa/MyApp.ipa
+        path: build/ios/ipa/*.ipa
 
     # ================= Android Build =================
     - name: Build Android APK
