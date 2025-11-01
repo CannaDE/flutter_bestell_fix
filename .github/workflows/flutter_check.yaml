@@ -17,11 +17,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Statt subosito/flutter-action direkt vom Flutter-Repo installieren
+      # Flutter direkt vom offiziellen Repo installieren (stabil und fehlerfrei)
       - name: Install Flutter manually
         run: |
           git clone https://github.com/flutter/flutter.git -b stable
           echo "$PWD/flutter/bin" >> $GITHUB_PATH
+          echo "PUB_CACHE=$HOME/.pub-cache" >> $GITHUB_ENV
 
       - name: Display Flutter version
         run: flutter --version
@@ -29,12 +30,20 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # 🔧 Wichtiger Fix: flutter_lints Paket korrekt sicherstellen
       - name: Ensure flutter_lints available
-        run: flutter pub add flutter_lints --dev || true
+        run: |
+          if ! grep -q "flutter_lints" pubspec.yaml; then
+            echo "Adding flutter_lints as dev dependency..."
+            flutter pub add flutter_lints --dev
+          fi
+          flutter pub get
 
+      # ✅ Code-Formatierung prüfen (nutzt Flutter-Umgebung!)
       - name: Check code formatting
-        run: dart format --output=none --set-exit-if-changed .
-        
+        run: flutter format --set-exit-if-changed .
+
+      # 🔍 Suche nach Debug- oder Non-Production-Code
       - name: Check for debug or non-production code
         id: debug-check
         run: |
