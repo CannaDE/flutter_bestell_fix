@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:time_monitoring/screens/order_details_page.dart';
-import 'package:time_monitoring/screens/show_pdf_page.dart';
+import 'package:flutter_bestell_fix/screens/order_details_page.dart';
+import 'package:flutter_bestell_fix/screens/show_pdf_page.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,6 +27,68 @@ class _HomePageState extends State<HomePage> {
     } catch (_) {
       return isoDate;
     }
+  }
+
+  String formatChangelog(String rawText) {
+    // Ersetzt \r\n oder \n durch echte Zeilenumbrüche
+    return rawText
+        .replaceAll(r'\r\n', '\n')
+        .replaceAll(r'\n', '\n')
+        .trim();
+  }
+
+  Future<void> _showChangelogPopup(BuildContext context) async {
+    String changelogText = 
+      '- Version 1.0.0: Erstveröffentlichung\n'
+      '- Version 1.1.0: Produktbemerkungen hinzugefügt\n'
+      '- Version 1.2.0: Hive-Speicherung implementiert\n';
+
+      final connectivityResult = await (Connectivity().checkConnectivity());
+      final hasInternet = connectivityResult != ConnectivityResult.none;
+
+      if(hasInternet) {
+        try {
+          final response = await http.get(
+            Uri.parse('https://api.github.com/repos/CannaDE/flutter_bestell_fix/releases/latest'),
+            headers: {
+              'Accept': 'application/vnd.github.v3+json',
+            },
+          );
+
+          if(response.statusCode == 200) {
+            final data = json.decode(response.body);
+            final latestVersion = data['tag_name'] ?? 'Unbekannt';
+            final releaseNotes = data['body'] ?? 'Keine weiteren Informationen vorhanden.';
+
+            changelogText = '🆕 Version $latestVersion\n\n$releaseNotes';
+          } else {
+            changelogText = '\n\n⚠️ Konnte keine neuen Changelogs abrufen.';
+          }
+        } 
+        catch (e) {
+          changelogText += '\n\n⚠️ Fehler beim Abrufen der Changelogs: $e';
+        }
+      } else {
+        changelogText += '\n\n⚠️ Keine Internetverbindung. Konnte keine neuen Changelogs abrufen.';
+      }
+      print(changelogText);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Letzter Changelog'),
+          content: SingleChildScrollView(
+            child: MarkdownBody(
+              data: formatChangelog(changelogText),
+              ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Schließen'),
+            ),
+          ],
+        ),
+      );
   }
 
   Future<void> _navigateToOrderDetails({String? orderId}) async {
@@ -80,27 +147,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showChangelogPopup() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Letzter Changelog'),
-        content: const SingleChildScrollView(
-          child: Text(
-            '- Version 1.0.0: Erstveröffentlichung\n'
-            '- Version 1.1.0: Produktbemerkungen hinzugefügt\n'
-            '- Version 1.2.0: Hive-Speicherung implementiert\n',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Schließen'),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +159,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.help_outline),
             tooltip: 'Changelog',
-            onPressed: _showChangelogPopup,
+            onPressed: () => _showChangelogPopup(context),
           ),
         ],
       ),
@@ -218,6 +264,15 @@ class _HomePageState extends State<HomePage> {
             },
           );
         },
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.grey.shade200,
+        padding: const EdgeInsets.all(12),
+        child: const Text(
+          '© 2024 BestellFix\r\n Made with ❤️ by WebExpanded.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Colors.black54),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToOrderDetails(),
