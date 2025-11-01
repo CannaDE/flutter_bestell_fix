@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +30,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   String formatChangelog(String rawText) {
-    // Ersetzt \r\n oder \n durch echte Zeilenumbrüche
     return rawText
         .replaceAll(r'\r\n', '\n')
         .replaceAll(r'\n', '\n')

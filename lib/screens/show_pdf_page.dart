@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart' hide PdfDocument;
 import 'package:printing/printing.dart'; // PdfPreview, share, printing
@@ -21,6 +22,9 @@ class _ShowPdfPageState extends State<ShowPdfPage> {
 
   Future<Uint8List> _generatePdfBytes() async {
     final pdf = pw.Document();
+
+    final packageInfo = await PackageInfo.fromPlatform();
+    final appVersion = packageInfo.version;
 
     final logoBytes = await rootBundle.load('assets/logo.png');
     final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
@@ -96,12 +100,12 @@ class _ShowPdfPageState extends State<ShowPdfPage> {
               pw.SizedBox(height: 15),
               pw.SizedBox(height: 8),
               pw.TableHelper.fromTextArray(
-                headers: ['Bezeichnung', 'Anzahl', 'Einheit', 'Bemerkung'],
+                headers: ['Anzahl', 'Einheit', 'Bezeichnung', 'Bemerkung'],
                 data: products
                     .map((p) => [
-                          p['name'] ?? '',
-                           p['quantity'] ?? '',
+                          p['quantity'] ?? '',
                           p['unit'] ?? '',
+                          p['name'] ?? '',
                           p['note'] ?? '',
                         ])
                     .toList(),
@@ -124,7 +128,7 @@ class _ShowPdfPageState extends State<ShowPdfPage> {
                 child: pw.Column(
                   children: [
                     pw.Text(
-                      'Erstellt mit BestellFix',
+                      'Erstellt mit BestellFix v$appVersion',
                       style: pw.TextStyle(fontSize: 7)
                     ),
                     pw.Text(
