@@ -38,6 +38,11 @@ dependencies:
   pdf: ^3.10.1        # zum Erstellen von PDFs (package:pdf)
   pdfx: ^2.9.2   # für PDF-Anzeige
   printing: ^5.10.4   # zum Drucken/Teilen/Speichern
+  http: ^1.2.0
+  package_info_plus: ^8.0.0
+  connectivity_plus: ^6.0.0
+  android_intent_plus: ^5.1.0
+  dio: ^5.4.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
