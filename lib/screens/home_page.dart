@@ -269,7 +269,7 @@ class _HomePageState extends State<HomePage> {
         color: Colors.grey.shade200,
         padding: const EdgeInsets.all(12),
         child: const Text(
-          '© 2024 BestellFix\r\n Made with ❤️ by WebExpanded.',
+          'BestellFix v1.0.0\r\n Made with ❤️ by WebExpanded.',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 12, color: Colors.black54),
         ),

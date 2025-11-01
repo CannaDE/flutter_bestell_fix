@@ -39,8 +39,10 @@ jobs:
           FTP_PATH: ${{ secrets.FTP_PATH }}
         run: |
           echo "🌐 Uploading Flutter Web build to FTP..."
-          lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" <<EOF
-          mirror -R build/web $FTP_PATH --delete --parallel=2
-          quit
+          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_HOST }} <<EOF
+          set ssl:verify-certificate no
+          set ftp:passive-mode on
+          mirror -R build/web ${{ secrets.FTP_TARGET_DIR }} --verbose
+          bye
           EOF
           echo "✅ Upload finished"
