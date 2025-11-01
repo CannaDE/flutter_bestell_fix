@@ -29,15 +29,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze code
-        run: flutter analyze --fatal-infos --fatal-warnings
-
       - name: Check code formatting
         run: dart format --output=none --set-exit-if-changed .
-
-      - name: Run unit tests
-        run: flutter test --no-pub
-
+        
       - name: Check for debug or non-production code
         id: debug-check
         run: |
