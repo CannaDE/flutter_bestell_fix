@@ -1,0 +1,34 @@
+name: Flutter Android Release Build
+
+on:
+  workflow_run:
+    workflows: ["Flutter Code Quality & Production Check"]
+    types:
+      - completed
+
+jobs:
+  android_build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: 🤖 Build Android APK (Release)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk

@@ -1,0 +1,54 @@
+name: Flutter Code Quality & Production Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  production_check:
+    name: 🔍 Flutter Production Readiness Check
+    runs-on: ubuntu-latest
+
+    outputs:
+      check_status: ${{ steps.check-status.outcome }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Check code formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Run unit tests
+        run: flutter test --no-pub
+
+      - name: Check for debug or non-production code
+        id: debug-check
+        run: |
+          echo "🔎 Searching for non-production code..."
+          set +e
+          MATCHES=$(grep -RIn --exclude-dir=build --exclude-dir=.dart_tool --exclude-dir=ios --exclude-dir=android -E "print\(|debugPrint\(|assert\(|kDebugMode|debugMode" lib/)
+          if [ ! -z "$MATCHES" ]; then
+            echo "::error::❌ Found potential debug code:"
+            echo "$MATCHES"
+            exit 1
+          else
+            echo "✅ No debug or non-production code found."
+          fi
+          set -e
+
+      - name: Mark check as successful
+        id: check-status
+        run: echo "✅ Production check passed successfully."
