@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Ensure flutter_lints available
+        run: flutter pub add flutter_lints --dev || true
+
       - name: Check code formatting
         run: dart format --output=none --set-exit-if-changed .
         
