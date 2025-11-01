@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_bestell_fix/screens/order_details_page.dart';
 import 'package:flutter_bestell_fix/screens/show_pdf_page.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -150,6 +152,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('BestellFix'),
@@ -268,12 +271,28 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: Container(
         color: Colors.grey.shade200,
         padding: const EdgeInsets.all(12),
-        child: const Text(
-          'BestellFix v1.0.0\r\n Made with ❤️ by WebExpanded.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: Colors.black54),
+        child: FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Text(
+                'BestellFix – Version wird geladen...',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              );
+            }
+
+            final version = snapshot.data!.version;
+            final buildNumber = snapshot.data!.buildNumber;
+
+            return Text(
+              'BestellFix v$version\nMade with ❤️ by WebExpanded.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            );
+          },
         ),
-      ),
+      ),  
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToOrderDetails(),
         child: const Icon(Icons.add),
