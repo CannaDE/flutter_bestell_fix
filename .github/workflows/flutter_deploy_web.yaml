@@ -13,29 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Repository auschecken
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Flutter installieren
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 'stable'
-
-      # Flutter Dependencies installieren
+      - name: Install Flutter manually
+        run: |
+          git clone https://github.com/flutter/flutter.git -b stable
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+          echo "PUB_CACHE=$HOME/.pub-cache" >> $GITHUB_ENV
+      
       - name: Install dependencies
         run: flutter pub get
 
-      # Flutter Web builden
       - name: Build Flutter Web
         run: flutter build web --release
 
-      # FTP Upload vorbereiten
       - name: Install FTP client
         run: sudo apt-get update && sudo apt-get install -y lftp
 
-      # Dateien auf FTP hochladen
       - name: Upload to FTP
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
