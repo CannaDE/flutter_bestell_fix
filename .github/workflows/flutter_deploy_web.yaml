@@ -2,9 +2,9 @@ name: Flutter Web Build & FTP Upload
 
 on:
   workflow_run:
-      workflows: ["Flutter Code Quality & Production Check"]
-      types:
-        - completed
+    workflows: ["Flutter Code Quality & Production Check"]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
@@ -27,9 +27,6 @@ jobs:
 
       - name: Build Flutter Web
         run: flutter build web --release
-
-      - name: Install FTP client
-        run: sudo apt-get update && sudo apt-get install -y lftp
 
       - name: Upload to FTP
         env:
