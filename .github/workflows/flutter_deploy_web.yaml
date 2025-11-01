@@ -29,12 +29,17 @@ jobs:
         run: flutter build web --release
 
       - name: Upload to FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./build/web
-          server-dir: /
-          protocol: ftps
-          port: 21
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PATH: ${{ secrets.FTP_PATH }}
+        run: |
+          echo "🌐 Uploading Flutter Web build to FTP..."
+          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_HOST }} <<EOF
+          set ssl:verify-certificate no
+          set ftp:passive-mode on
+          mirror -R build/web ${{ secrets.FTP_TARGET_DIR }} --verbose
+          bye
+          EOF
+          echo "✅ Upload finished"

@@ -223,6 +223,7 @@ void initState() {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -230,19 +231,38 @@ void initState() {
         title: const Text('Neue Bestellung'),
         backgroundColor: Colors.grey.shade200,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            tooltip: 'Allgemeine Infos',
-            onPressed: _showGeneralInfoModal,
-          ),
+          
         ],
       ),
-      body: Padding(
+      body:
+      Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
+              MaterialBanner(
+                content: Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Row(
+                    
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Bauvorhaben: $project\nFirma: $company\nAnsprechpartner: $contactPerson\nTelefon: $phoneNumber\nDatum: ${selectedDate.day.toString().padLeft(2, '0')}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.year}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                  
+                  ],)
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: _showGeneralInfoModal,
+                    child: const Text('Bearbeiten'),
+                  ),
+                ],
+              ),
               // Scrollbarer Bereich für Produkte
               Expanded(
                 child: SingleChildScrollView(
