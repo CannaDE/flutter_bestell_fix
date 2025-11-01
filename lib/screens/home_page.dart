@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:time_monitoring/screens/order_details_page.dart';
-import 'package:time_monitoring/screens/show_pdf_page.dart';
+import 'package:flutter_bestell_fix/screens/order_details_page.dart';
+import 'package:flutter_bestell_fix/screens/show_pdf_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

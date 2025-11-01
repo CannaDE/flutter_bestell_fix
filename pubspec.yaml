@@ -1,4 +1,4 @@
-name: time_monitoring
+name: flutter_bestell_fix
 description: A Flutter time tracking app
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -36,7 +36,7 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.0.14
   pdf: ^3.10.1        # zum Erstellen von PDFs (package:pdf)
-  pdfx: ^2.9.2   # für PDF-Anzeige
+  # pdfx removed to improve web compatibility; using `printing`'s PdfPreview for PDF display.
   printing: ^5.10.4   # zum Drucken/Teilen/Speichern
 
   # The following adds the Cupertino Icons font to your application.

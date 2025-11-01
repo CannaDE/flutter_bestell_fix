@@ -1,11 +1,9 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart' hide PdfDocument;
-import 'package:pdfx/pdfx.dart';
-import 'package:printing/printing.dart'; // PdfView
+import 'package:printing/printing.dart'; // PdfPreview, share, printing
 
 
 
@@ -19,14 +17,7 @@ class ShowPdfPage extends StatefulWidget {
 }
 
 class _ShowPdfPageState extends State<ShowPdfPage> {
-  late final Future<Uint8List> _pdfFuture;
-  PdfController? _pdfController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pdfFuture = _generatePdfBytes();
-  }
+  // No persistent controller: use PdfPreview from `printing` which works on web and mobile.
 
   Future<Uint8List> _generatePdfBytes() async {
     final pdf = pw.Document();
@@ -105,12 +96,12 @@ class _ShowPdfPageState extends State<ShowPdfPage> {
               pw.SizedBox(height: 15),
               pw.SizedBox(height: 8),
               pw.TableHelper.fromTextArray(
-                headers: ['Anzahl', 'Einheit', 'Bezeichnung', 'Bemerkung'],
+                headers: ['Bezeichnung', 'Anzahl', 'Einheit', 'Bemerkung'],
                 data: products
                     .map((p) => [
-                          p['quantity'] ?? '',
-                          p['unit'] ?? '',
                           p['name'] ?? '',
+                           p['quantity'] ?? '',
+                          p['unit'] ?? '',
                           p['note'] ?? '',
                         ])
                     .toList(),
@@ -164,38 +155,21 @@ class _ShowPdfPageState extends State<ShowPdfPage> {
             icon: const Icon(Icons.save_rounded),
             tooltip: 'PDF teilen',
             onPressed: () async {
-              final bytes = await _pdfFuture;
+              final bytes = await _generatePdfBytes();
               await Printing.sharePdf(bytes: bytes, filename: 'bestellung.pdf');
             },
           ),
         ],
       ),
-      body: FutureBuilder<Uint8List>(
-        future: _pdfFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Fehler: ${snapshot.error}'));
-          } else {
-            final pdfBytes = snapshot.data!;
-            _pdfController ??= PdfController(
-              document: PdfDocument.openData(pdfBytes),
-            );
-
-            return PdfView(
-              controller: _pdfController!,
-              scrollDirection: Axis.vertical,
-            );
-          }
-        },
+      body: PdfPreview(
+        build: (PdfPageFormat format) => _generatePdfBytes(),
+        allowPrinting: true,
+        allowSharing: true,
+        canChangePageFormat: false,
+        maxPageWidth: 1200,
+        loadingWidget: const Center(child: CircularProgressIndicator()),
       ),
     );
   }
 
-  @override
-  void dispose() {
-    _pdfController?.dispose();
-    super.dispose();
-  }
 }
