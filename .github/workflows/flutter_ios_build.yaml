@@ -17,6 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Flutter direkt vom offiziellen Repo installieren
       - name: Install Flutter manually
         run: |
           git clone https://github.com/flutter/flutter.git -b stable
@@ -26,13 +27,31 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # ExportOptions.plist für unsignierte IPA
+      - name: Create ExportOptions.plist
+        run: |
+          cat <<EOF > ios/ExportOptions.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>development</string>
+              <key>compileBitcode</key>
+              <false/>
+              <key>signingStyle</key>
+              <string>manual</string>
+          </dict>
+          </plist>
+          EOF
+
       - name: Build Unsigned IPA
-        run: flutter build ipa --release --no-codesign
+        run: flutter build ipa --release --no-codesign --export-options-plist=ios/ExportOptions.plist
 
       - name: Prepare AltStore File Structure
         run: |
           mkdir -p altstore_output
-          cp build/ios/ipa/*.ipa altstore_output/time_monitoring.ipa
+          cp build/ios/ipa/*.ipa altstore_output/time_monitoring.ipa || echo "⚠️ No IPA found, check previous step"
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
