@@ -5,6 +5,7 @@ on:
     workflows: ["Flutter Code Quality & Production Check"]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   android_build:

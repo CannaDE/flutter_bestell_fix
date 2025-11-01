@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_bestell_fix/screens/home_page.dart';
+import 'package:time_monitoring/screens/home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class BestellFixApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme:  ColorScheme.fromSeed(seedColor: Colors.grey.shade200,),
       ),
-      home: const HomePage(),
+      home: HomePage(),
     );
   }
 }
