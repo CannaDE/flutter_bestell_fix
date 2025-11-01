@@ -283,7 +283,7 @@ class _HomePageState extends State<HomePage> {
             }
 
             final version = snapshot.data!.version;
-            final buildNumber = snapshot.data!.buildNumber;
+            //final buildNumber = snapshot.data!.buildNumber;
 
             return Text(
               'BestellFix v$version\nMade with ❤️ by WebExpanded.',
