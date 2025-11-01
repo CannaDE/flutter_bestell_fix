@@ -169,6 +169,15 @@ class _ShowPdfPageState extends State<ShowPdfPage> {
         maxPageWidth: 1200,
         loadingWidget: const Center(child: CircularProgressIndicator()),
       ),
+      bottomNavigationBar: Container(
+        color: Colors.grey.shade200,
+        padding: const EdgeInsets.all(12),
+        child: const Text(
+          '© 2024 BestellFix\r\n Made with ❤️ by WebExpanded.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+      ),
     );
   }
 

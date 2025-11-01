@@ -361,6 +361,15 @@ void initState() {
           ),
         ),
       ),
+      bottomNavigationBar: Container(
+        color: Colors.grey.shade200,
+        padding: const EdgeInsets.all(12),
+        child: const Text(
+          '© 2024 BestellFix\r\n Made with ❤️ by WebExpanded.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+      ),
     );
   }
 }
