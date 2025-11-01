@@ -1,0 +1,51 @@
+name: Flutter Web Build & FTP Upload
+
+on:
+  workflow_run:
+      workflows: ["Flutter Code Quality & Production Check"]
+      types:
+        - completed
+  workflow_dispatch:
+
+jobs:
+  build_and_upload:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      # Repository auschecken
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Flutter installieren
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      # Flutter Dependencies installieren
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Flutter Web builden
+      - name: Build Flutter Web
+        run: flutter build web --release
+
+      # FTP Upload vorbereiten
+      - name: Install FTP client
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      # Dateien auf FTP hochladen
+      - name: Upload to FTP
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PATH: ${{ secrets.FTP_PATH }}
+        run: |
+          echo "🌐 Uploading Flutter Web build to FTP..."
+          lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" <<EOF
+          mirror -R build/web $FTP_PATH --delete --parallel=2
+          quit
+          EOF
+          echo "✅ Upload finished"
