@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
       } else {
         changelogText += '\n\n⚠️ Keine Internetverbindung. Konnte keine neuen Changelogs abrufen.';
       }
-      print(changelogText);
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
