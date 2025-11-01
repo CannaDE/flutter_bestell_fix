@@ -1,0 +1,39 @@
+name: Flutter iOS Unsigned IPA Build (AltStore)
+
+on:
+  workflow_run:
+    workflows: ["Flutter Code Quality & Production Check"]
+    types:
+      - completed
+
+jobs:
+  ios_build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: 🍏 Build Unsigned iOS IPA (AltStore)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Unsigned IPA
+        run: flutter build ipa --release --no-codesign
+
+      - name: Prepare AltStore File Structure
+        run: |
+          mkdir -p altstore_output
+          cp build/ios/ipa/*.ipa altstore_output/time_monitoring.ipa
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: time_monitoring_altstore.ipa
+          path: altstore_output/time_monitoring.ipa
