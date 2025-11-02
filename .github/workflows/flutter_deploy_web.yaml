@@ -1,4 +1,4 @@
-name: Flutter Web Build & FTP Upload
+name: Flutter Web Build & Artifact Upload
 
 on:
   workflow_run:
@@ -28,13 +28,15 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web --release
 
-      - name: Upload to FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      - name: Create ZIP archive
+        run: |
+          cd build
+          zip -r web_build.zip web
+          mv web_build.zip ../web_build.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./build/web
-          server-dir: /
-          protocol: ftps
-          port: 21
+          name: flutter-web-build
+          path: web_build.zip
+          retention-days: 7

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -36,59 +37,82 @@ class _HomePageState extends State<HomePage> {
         .trim();
   }
 
-  Future<void> _showChangelogPopup(BuildContext context) async {
-    String changelogText = 
-      '- Version 1.0.0: Erstveröffentlichung\n'
-      '- Version 1.1.0: Produktbemerkungen hinzugefügt\n'
-      '- Version 1.2.0: Hive-Speicherung implementiert\n';
-
-      final connectivityResult = await (Connectivity().checkConnectivity());
-      final hasInternet = connectivityResult != ConnectivityResult.none;
-
-      if(hasInternet) {
-        try {
-          final response = await http.get(
-            Uri.parse('https://api.github.com/repos/CannaDE/flutter_bestell_fix/releases/latest'),
-            headers: {
-              'Accept': 'application/vnd.github.v3+json',
-            },
-          );
-
-          if(response.statusCode == 200) {
-            final data = json.decode(response.body);
-            final latestVersion = data['tag_name'] ?? 'Unbekannt';
-            final releaseNotes = data['body'] ?? 'Keine weiteren Informationen vorhanden.';
-
-            changelogText = '🆕 Version $latestVersion\n\n$releaseNotes';
-          } else {
-            changelogText = '\n\n⚠️ Konnte keine neuen Changelogs abrufen.';
-          }
-        } 
-        catch (e) {
-          changelogText += '\n\n⚠️ Fehler beim Abrufen der Changelogs: $e';
-        }
-      } else {
-        changelogText += '\n\n⚠️ Keine Internetverbindung. Konnte keine neuen Changelogs abrufen.';
-      }
-
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Letzter Changelog'),
-          content: SingleChildScrollView(
-            child: MarkdownBody(
-              data: formatChangelog(changelogText),
-              ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Schließen'),
-            ),
-          ],
-        ),
+  Future<PackageInfo?> _getPackageInfo() async {
+    try {
+      return await PackageInfo.fromPlatform();
+    } catch (_) {
+      // Auf Web fallback
+      return PackageInfo(
+        appName: 'BestellFix',
+        packageName: 'eu.webexpanded.bestellfix',
+        version: '1.0.1',
+        buildNumber: '1',
       );
+    }
   }
+
+  
+Future<void> _showChangelogPopup(BuildContext context) async {
+  String changelogText = '';
+
+  try {
+    // Lokales JSON laden
+    final jsonString = await rootBundle.loadString('assets/changelog.json');
+    final Map<String, dynamic> jsonData = json.decode(jsonString);
+
+    // In lesbaren Text umwandeln
+    final buffer = StringBuffer();
+    jsonData.forEach((version, desc) {
+      buffer.writeln('🆕 Version $version: $desc');
+    });
+
+    changelogText = buffer.toString();
+  } catch (e) {
+    changelogText = '⚠️ Konnte lokale Changelogs nicht laden: $e';
+  }
+
+  // Optional: Internet + GitHub prüfen
+  try {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    final hasInternet = connectivityResult != ConnectivityResult.none;
+
+    if (hasInternet) {
+      final response = await http.get(
+        Uri.parse(
+            'https://api.github.com/repos/CannaDE/flutter_bestell_fix/releases/latest'),
+        headers: {'Accept': 'application/vnd.github.v3+json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final latestVersion = data['tag_name'] ?? '';
+        final releaseNotes = data['body'] ?? '';
+        changelogText = '🆕 Version $latestVersion\n\n$releaseNotes';
+      }
+    }
+  } catch (_) {
+    // Fehler ignorieren, bleibt beim lokalen Changelog
+  }
+
+  // Dialog anzeigen
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Letzter Changelog'),
+      content: SingleChildScrollView(
+        child: MarkdownBody(
+          data: changelogText,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Schließen'),
+        ),
+      ],
+    ),
+  );
+}       
 
   Future<void> _navigateToOrderDetails({String? orderId}) async {
     await Navigator.push(
@@ -268,26 +292,16 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: Container(
         color: Colors.grey.shade200,
         padding: const EdgeInsets.all(12),
-        child: FutureBuilder<PackageInfo>(
-          future: PackageInfo.fromPlatform(),
+        child: FutureBuilder<PackageInfo?>(
+          future: _getPackageInfo(),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Text(
-                'BestellFix – Version wird geladen...',
+            final version = snapshot.data?.version ?? '1.0.0';
+              return Text(
+                'BestellFix v$version\nMade with ❤️ by WebExpanded.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.black54),
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
               );
-            }
-
-            final version = snapshot.data!.version;
-            //final buildNumber = snapshot.data!.buildNumber;
-
-            return Text(
-              'BestellFix v$version\nMade with ❤️ by WebExpanded.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
-            );
-          },
+          }
         ),
       ),  
       floatingActionButton: FloatingActionButton(
